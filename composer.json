@@ -1,5 +1,5 @@
 {
-    "name": "webdam-php-client",
+    "name": "bbaisley/webdam-php-client",
     "description": "PHP API client for www.webdam.com/apidocsv2",
     "license": "MIT",
     "homepage": "https://github.com/bbaisley/webdam-php-client",
