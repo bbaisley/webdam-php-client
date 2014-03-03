@@ -77,22 +77,18 @@ class Api {
         	$expires = strtotime('+'.($expires - 20).' seconds');
     	}
     	$this->access_expires = $expires;
-    	// Check if token has expired
-    	if ( $this->checkAccess() ) {
-        	$this->access_token = $access_token;
-        	if ( !is_null($refresh_token) ) {
-        	    $this->refresh_token = $refresh_token;
-        	}
-        	$this->token_type = $token_type;
-        	$hdr = array('Authorization' => $token_type.' '.$access_token);
-        	$this->rest_client->setHeaders($hdr);
+        $this->access_token = $access_token;
+    	if ( !is_null($refresh_token) ) {
+    	    $this->refresh_token = $refresh_token;
     	}
+    	$this->token_type = $token_type;
+    	$hdr = array('Authorization' => $token_type.' '.$access_token);
+    	$this->rest_client->setHeaders($hdr);
 	}
 	
 	public function checkAccess() {
     	if ($this->access_expires < time()) {
         	$response = $this->refreshAccess();
-        	print_r($response);
         	if ( $response->meta['http_code']==200 ) {
             	$this->setAccess($this->response->data['access_token'], $this->response->data['expires_in']);
         	}
@@ -102,16 +98,21 @@ class Api {
     	}
 	}
 	
-	public function refreshAccess() {
+	public function refreshAccess($refresh_token=null) {
+	    static $call_count = 0;
+	    if ( $call_count>1 ) {
+    	    exit();
+	    }
     	$url = $this->base_url . 'oauth2/token';
     	$data = array(
     	    'grant_type'=>'refresh_token',
-    	    'refresh_token'=>$this->refresh_token,
+    	    'refresh_token'=>(is_null($refresh_token) ? $this->refresh_token : $refresh_token),
     	    'client_id'=>$this->client_id,
     	    'client_secret'=>$this->client_secret,
     	    'redirect_uri'=>$this->redirect_base
         );
         $response = $this->rest_client->post($url, $data);
+        $call_count++;
         return $response;
 	}
 	
@@ -245,6 +246,15 @@ class Api {
             'name'=>$name
             );
     	$response = $this->rest_client->put($url, json_encode($data));
+    	return $response;        
+	}
+	
+	public function lightboxAdd($lid, $aid) {
+        $url = $this->base_url . 'lightboxes/'.$lid.'/assets';
+        $data = array(
+            'id'=>$aid
+            );
+    	$response = $this->rest_client->post($url, json_encode($data));
     	return $response;        
 	}
 }

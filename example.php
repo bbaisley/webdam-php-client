@@ -12,9 +12,6 @@ $response = new bbaisley\Response();
 $api = new bbaisley\Api($id, $secret, $presto, $response);
 
 
-//print_r($api->authUrl('http://premier.bbaisley.dev.shutterstock.com'));
-//print_r($api->accessToken('http://premier.bbaisley.dev.shutterstock.com', '5ec79ea4fd1f335caa3a5e22033b1c4424cf7a5d'));
-
 $api->setAccess($access_token, $expires, $refresh_token);
 /*
 print_r($api->refreshAccess());
