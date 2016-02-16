@@ -72,6 +72,17 @@ class Api {
     	    'client_secret' => $this->client_secret
             );
         $response = $this->rest_client->post($url, $data);
+
+		$response->data = json_decode( $response->data );
+
+		if ( 200 === $response->meta['http_code'] ) {
+			$this->access_token = $response->data->access_token;
+			$this->access_token_expires_in = $response->data->expires_in;
+			$this->access_expires = strtotime( '+' . ( $this->access_token_expires_in - 20 ) . ' seconds' );
+			$this->refresh_token = $response->data->refresh_token;
+			$this->setAccessHeaders();
+		}
+
         return $response;
 	}
 
@@ -119,29 +130,24 @@ class Api {
 		return $response;
 	}
 	
-	public function setAccess($access_token, $expires, $refresh_token=null, $token_type='Bearer') {
-        // Check if unix time or future in seconds was passed
-        // by checking if $expires is less than seconds in a week
-    	if ($expires < 604800) {
-    	    // Substract 20 seconds to refresh before it expires
-        	$expires = strtotime('+'.($expires - 20).' seconds');
-    	}
-    	$this->access_expires = $expires;
-        $this->access_token = $access_token;
-    	if ( !is_null($refresh_token) ) {
-    	    $this->refresh_token = $refresh_token;
-    	}
+	public function setAccessHeaders( $token_type = 'Bearer' ) {
+
     	$this->token_type = $token_type;
-    	$hdr = array('Authorization' => $token_type.' '.$access_token);
-    	$this->rest_client->setHeaders($hdr);
+
+    	$this->rest_client->setHeaders(
+			array( 'Authorization' => $this->token_type . ' ' . $this->access_token )
+		);
 	}
-	
-	public function checkAccess() {
+
+	/**
+	 * Is the current access token still valid?
+	 *
+	 * @param null
+	 * 
+	 * @return bool True if the token is valid, false if it is not.
+	 */
+	public function isAccessTokenExpired() {
     	if ($this->access_expires < time()) {
-        	$response = $this->refreshAccess();
-        	if ( $response->meta['http_code']==200 ) {
-            	$this->setAccess($this->response->data['access_token'], $this->response->data['expires_in']);
-        	}
         	return false;
     	} else {
         	return true;
@@ -162,6 +168,14 @@ class Api {
     	    'redirect_uri'=>$this->redirect_base
         );
         $response = $this->rest_client->post($url, $data);
+
+		if ( $response->meta['http_code']==200 ) {
+			$response->data = json_decode( $response->data );
+			$this->access_token = $response->data->access_token;
+			$this->access_token_expires_in = $response->data->expires_in;
+			$this->setAccessHeaders();
+		}
+
         $call_count++;
         return $response;
 	}
