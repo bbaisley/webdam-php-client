@@ -22,7 +22,9 @@ class Api {
 	protected $client_username = null;
 
 	protected $client_password = null;
-	
+
+	public $access_token_type = null;
+
 	public $access_token = null;
 
 	public $access_token_expires_in = null;
@@ -61,7 +63,20 @@ class Api {
         $url = $this->base_url . 'oauth2/authorize?' . http_build_query($params);
         return $url;
 	}
-	
+
+	/**
+	 * Get and access token using an authorization_code
+	 *
+	 * Once you've hit the following URL and received your authorization code
+	 * you can call this method to receive an access token.
+	 *
+	 * https://apiv2.webdamdb.com/oauth2/authorize?response_type=code&client_id=CLIENT_ID&redirect_uri=REDIRECT_URI&state=STATE
+	 *
+	 * @param string $redirect_uri The redirect URI used when obtaining the auth code
+	 * @param string $code         The auth_code given by WebDAM
+	 *
+	 * @return Presto/Response $response The response object
+	 */
 	public function getAccessTokenUsingAuthCode($redirect_uri, $code) {
     	$url = $this->base_url . 'oauth2/token';
     	$data = array(
@@ -96,7 +111,7 @@ class Api {
 	 * @param string $username Your WebDAM Username
 	 * @param string $password Your WebDAM Password
 	 *
-	 * @return mixed
+	 * @return Presto/Response $response The response object
 	 */
 	public function getAccessTokenUsingPassword( $username, $password ) {
 
@@ -120,7 +135,6 @@ class Api {
 		$this->access_token = $response->data->access_token;
 		$this->access_token_expires_in = $response->data->expires_in;
 		$this->access_expires = strtotime( '+' . ( $this->access_token_expires_in - 20 ) . ' seconds' );
-
 		$this->refresh_token = $response->data->refresh_token;
 
 		if ( 200 === $response->meta['http_code'] ) {
@@ -129,13 +143,20 @@ class Api {
 
 		return $response;
 	}
-	
+
+	/**
+	 * Set the 'Authoriation' header for all future API requests
+	 *
+	 * @param string $token_type The token type. Currently only 'Bearer' is supported
+	 *
+	 * @return null
+	 */
 	public function setAccessHeaders( $token_type = 'Bearer' ) {
 
-    	$this->token_type = $token_type;
+    	$this->access_token_type = $token_type;
 
     	$this->rest_client->setHeaders(
-			array( 'Authorization' => $this->token_type . ' ' . $this->access_token )
+			array( 'Authorization' => $this->access_token_type . ' ' . $this->access_token )
 		);
 	}
 
@@ -143,7 +164,7 @@ class Api {
 	 * Is the current access token still valid?
 	 *
 	 * @param null
-	 * 
+	 *
 	 * @return bool True if the token is valid, false if it is not.
 	 */
 	public function isAccessTokenExpired() {
