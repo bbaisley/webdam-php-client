@@ -257,6 +257,48 @@ class Api {
     	$response = $this->rest_client->post($url, json_encode($data));
     	return $response;        
 	}
+
+	/**
+	 * GET Image Metadata
+	 *
+	 * Fetch XMP metadata for a given image ID
+	 *
+	 * @param int|array $asset_ids The asset ID(s) you're fetching data for
+	 * e.g. $asset_ids = 23945510;
+	 * $asset_ids = array( 23945510, 23945511, ... );
+	 *
+	 * @return Presto\Response $response Response object
+	 */
+	public function getAssetMetadata( $asset_ids = array() ) {
+
+		if ( empty( $asset_ids ) ) {
+			return false;
+		}
+
+		// Convert non-array asset id to an array so our code below
+		// can confidently deal with an array
+		$asset_ids = (array) $asset_ids;
+
+		// Ensure we're dealing with integer ID's
+		$asset_ids = array_map( 'intval', $asset_ids );
+
+		// Convert our array of ID's into a comma-delimited string
+		// this allows us to fetch metadata for up to 50 assets
+		$asset_ids = implode( ',', $asset_ids );
+
+		$url = "{$this->base_url}assets/$asset_ids/metadatas/xmp";
+
+		$response = $this->rest_client->get( $url );
+
+		if ( 200 === $response->meta['http_code'] ) {
+
+			// Convert the string response into usable JSON
+			$response->data = json_decode( $response->data );
+
+		}
+
+		return $response;
+	}
 }
 
 
