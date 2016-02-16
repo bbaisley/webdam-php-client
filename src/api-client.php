@@ -18,9 +18,15 @@ class Api {
 	protected $client_id = null;
 	
 	protected $client_secret = null;
+
+	protected $client_username = null;
+
+	protected $client_password = null;
 	
 	public $access_token = null;
-	
+
+	public $access_token_expires_in = null;
+
 	public $access_expires = 0;
 	
 	public $refresh_token = null;
@@ -67,6 +73,50 @@ class Api {
             );
         $response = $this->rest_client->post($url, $data);
         return $response;
+	}
+
+	/**
+	 * Get an access token using a WebDAM username/password
+	 *
+	 * There are two methods of authentication:
+	 * authorization code
+	 * password
+	 *
+	 * @param string $username Your WebDAM Username
+	 * @param string $password Your WebDAM Password
+	 *
+	 * @return mixed
+	 */
+	public function getAccessTokenUsingPassword( $username, $password ) {
+
+		$url = $this->base_url . 'oauth2/token';
+
+		$this->client_username = $username;
+		$this->client_password = $password;
+
+		$data = array(
+			'grant_type'    => 'password',
+			'client_id'     => $this->client_id,
+			'client_secret' => $this->client_secret,
+			'username'      => $this->client_username,
+			'password'      => $this->client_password
+		);
+
+		$response = $this->rest_client->post( $url, $data );
+
+		$response->data = json_decode( $response->data );
+
+		$this->access_token = $response->data->access_token;
+		$this->access_token_expires_in = $response->data->expires_in;
+		$this->access_expires = strtotime( '+' . ( $this->access_token_expires_in - 20 ) . ' seconds' );
+
+		$this->refresh_token = $response->data->refresh_token;
+
+		if ( 200 === $response->meta['http_code'] ) {
+			$this->setAccessHeaders();
+		}
+
+		return $response;
 	}
 	
 	public function setAccess($access_token, $expires, $refresh_token=null, $token_type='Bearer') {
