@@ -288,7 +288,7 @@ class Api {
 
 		$url = "{$this->base_url}assets/$asset_ids/metadatas/xmp";
 
-    	$response = $this->rest_client->get( $url );
+		$response = $this->rest_client->get( $url );
 
 		if ( 200 === $response->meta['http_code'] ) {
 
@@ -297,7 +297,7 @@ class Api {
 
 		}
 
-    	return $response;
+		return $response;
 	}
 }
 
