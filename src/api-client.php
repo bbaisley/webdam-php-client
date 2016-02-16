@@ -174,7 +174,23 @@ class Api {
         	return true;
     	}
 	}
-	
+
+	/**
+	 * Refresh access to WebDAM
+	 *
+	 * Utilize the refresh token to request a new token.
+	 * The access token is only good for 1 hour, and needs to be
+	 * regenerated when making regular calls to the API.
+	 *
+	 * This can be called like so:
+	 * if ( $api->isAccessTokenExpired() ) {
+	 *		$api->refreshAccess();
+	 * }
+	 *
+	 * @param null $refresh_token
+	 *
+	 * @return mixed
+	 */
 	public function refreshAccess($refresh_token=null) {
 	    static $call_count = 0;
 	    if ( $call_count>1 ) {
