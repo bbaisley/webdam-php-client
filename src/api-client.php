@@ -153,9 +153,9 @@ class Api {
 	 */
 	public function setAccessHeaders( $token_type = 'Bearer' ) {
 
-    	$this->access_token_type = $token_type;
+		$this->access_token_type = $token_type;
 
-    	$this->rest_client->setHeaders(
+		$this->rest_client->setHeaders(
 			array( 'Authorization' => $this->access_token_type . ' ' . $this->access_token )
 		);
 	}
@@ -168,11 +168,11 @@ class Api {
 	 * @return bool True if the token is valid, false if it is not.
 	 */
 	public function isAccessTokenExpired() {
-    	if ($this->access_expires < time()) {
-        	return false;
-    	} else {
-        	return true;
-    	}
+		if ($this->access_expires < time()) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 
 	/**
