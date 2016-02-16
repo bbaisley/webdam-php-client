@@ -62,7 +62,7 @@ class Api {
         return $url;
 	}
 	
-	public function accessToken($redirect_uri, $code) {
+	public function getAccessTokenUsingAuthCode($redirect_uri, $code) {
     	$url = $this->base_url . 'oauth2/token';
     	$data = array(
     	    'grant_type' => 'authorization_code',
