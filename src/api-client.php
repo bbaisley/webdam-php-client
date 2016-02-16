@@ -264,8 +264,8 @@ class Api {
 	 * Fetch XMP metadata for a given image ID
 	 *
 	 * @param int|array $asset_ids The asset ID(s) you're fetching data for
-	 * 								e.g. $asset_ids = 23945510;
-	 * 								$asset_ids = array( 23945510, 23945511, ... );
+	 * e.g. $asset_ids = 23945510;
+	 * $asset_ids = array( 23945510, 23945511, ... );
 	 *
 	 * @return Presto\Response $response Response object
 	 */
